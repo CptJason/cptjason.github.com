@@ -1,0 +1,57 @@
+# Site wide configuration
+
+title: All for One, One for All
+locale: en_US
+description: Stay hungry & Stay foolish
+logo: site-logo.png
+search: true
+url: 
+paginate: 1
+paginate_path: "blog/page:num"
+
+
+# Jekyll configuration
+
+permalink: /:categories/:title/
+markdown: kramdown
+highlighter: pygments
+sass:
+  sass_dir: _sass
+  style: compressed
+gems:
+  - jekyll-sitemap
+    
+#future: true
+
+kramdown:
+  auto_ids: true
+  footnote_nr: 1
+  entity_output: as_char
+  toc_levels: 1..2
+  use_coderay: false
+
+include: [".htaccess"]
+exclude: ["lib", "config.rb", "Capfile", "config", "log", "Rakefile", "Rakefile.rb", "tmp", "less", "*.sublime-project", "*.sublime-workspace", "test", "spec", "Gruntfile.js", "package.json", "node_modules", "Gemfile", "Gemfile.lock", "LICENSE", "README.md", "vendor"]
+
+
+# Site owner
+owner:
+  name: Jason Zhou
+  avatar: zxr.jpg
+  email: beez.jason@gmail.com
+  disqus-shortname: cptjason
+  twitter: captainpacifica
+  facebook: ahmilliyon@gmail.com
+  github: CptJason
+  stackexchange: #http://stackoverflow.com/users/123456/username
+  linkedin: #username
+  instagram: #username
+  flickr: #username
+  tumblr: #username
+  google:
+    plus: 
+    analytics:
+    verify:
+    ad-client:
+    ad-slot: 
+  bing-verify:

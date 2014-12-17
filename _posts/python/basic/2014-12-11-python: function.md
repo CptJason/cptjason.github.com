@@ -1,0 +1,305 @@
+---
+layout: post
+title: "Python: Function"
+modified:
+categories: python
+excerpt:
+tags: []
+image:
+  feature:
+date: 2014-12-11T23:48:13+08:00
+---
+# Function Calls
+<hr>
+## Declaring Arguments
+
+###### Default Argument Values
+定义function带有"arg = value".<br>
+这样你就有可选性，在调用该function时你可以指定或者不指定该arg。<br>
+If you didn't specify a value, then that parameter will have the default value given.<br>
+
+{% highlight python %}
+def display_message(message, truncate_after=4):
+    print message[:truncate_after]
+display_message("message")
+display_message("message", 6)
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/function_with_arg_value.jpg)
+
+###### Variable-Length Argument Lists
+{% highlight python %}
+def print_tail(first, *tail):
+    print tail
+print_tail(1, 5, 2, "omega")
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/function_print_tail.jpg)
+
+{% highlight python %}
+def make_dictionary(max_length=10, **entries):
+    print entries
+    print entries.keys()
+    print list(enumerate(entries.keys()))
+    for i, key in enumerate(entries.keys()):
+        print i, key
+    print '-' * 10
+    l = [(key, entries[key]) for i, key in enumerate(entries.keys())]
+    print l
+    for i in l:
+        print i
+    print '-' * 10
+    l = [(key, entries[key]) for i, key in enumerate(entries.keys()) if i < max_length]
+    print l
+    for i in l:
+        print i
+    return dict([(key, entries[key]) for i, key in enumerate(entries.keys()) if i < max_length])
+
+make_dictionary(max_length=2, key1=5, key2=7, key3=9)
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/make_dictionary_fail.jpg)
+![Smithsonian Image]({{ site.url }}/images/make_dictionary_ok.jpg)
+
+###### By Value and by Reference
+
+传给functions作为参数的objects传过去的是reference，而不是objects本身。<br>
+所以对象并没有被拷贝到内存。<br>
+
+<table id="mytbid">
+  <tr>
+    <th width="15%"> Immutable </th> <th width="15%"> Mutable</th>
+  </tr>
+  <tr>
+    <td> int, float, long, complex </td> <td>  dict </td> 
+  </tr>
+  <tr class="alt">
+    <td> str </td> <td>  </td> 
+  </tr>
+  <tr>
+    <td> tuple </td> <td> list </td> 
+  </tr>
+  <tr class="alt">
+    <td> bytes </td> <td> byte array </td> 
+  </tr>
+  <tr>
+    <td> frozen set </td> <td> set </td> 
+  </tr>
+</table>
+
+可变data types对象，可以被function引用，也可以被function改变，可见。<br>
+不可变data types对象，也可以被function引用，但是不可以被function改变, 可见。<br>
+{% highlight python %}
+def append_to_sequence (myseq):
+    myseq += (9,9,9)
+    return myseq
+ 
+t=(1,2,3)     # tuples are immutable
+l=[1,2,3]     # lists are mutable
+ 
+u=append_to_sequence(t)
+m=append_to_sequence(l)
+ 
+print('t = ', t)
+print('u = ', u)
+print('l = ', l)
+print('m = ', m)
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/data_types_mutable_immutable.jpg)
+
+{% highlight python %}
+def appendItem(ilist, item):
+    ilist.append(item) 
+def replaceItems(ilist, newcontentlist):
+    del ilist[:]
+    print ilist
+    ilist.extend(newcontentlist)
+    print ilist
+    ilist = [5, 6]
+    print ilist
+def clearSet(iset):
+    iset.clear()
+def tryToTouchAnInteger(iint):
+    iint += 1 
+    print "iint inside:", iint
+list1 = [1, 2] 
+appendItem(list1, 3)
+print list1
+
+replaceItems(list1, [3, 4])
+print list1
+
+set1 = set([1, 2])
+clearSet(set1)
+print set1
+
+int1 = 3
+tryToTouchAnInteger(int1)
+print int1
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/function_by_value_reference.jpg)
+
+{% highlight python %}
+def evilGetLength(ilist):
+  length = len(ilist)
+  del ilist[:] 
+  return length
+ 
+list1 = [1, 2]
+print evilGetLength(list1)
+print list1
+list1 = [1, 2]
+print evilGetLength(list1[:])
+print list1
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/preventing_argument_change.jpg)
+
+# Closures
+<hr>
+
+wiki官方定义Closure<br>
+{% highlight python %}
+A closure is a nested function<br>
+with an after-return<br>
+access to the data of the outer function,<br> 
+where the nested function is returned<br>
+by the outer function as a function object.<br>
+{% endhighlight %}
+在一些语言中，一个函数可以嵌套另一个函数，即一个外部函数嵌套了一个内部函数，<br>
+且内部函数引用了外部函数的名字空间variables，则可能产生Closure（闭包）。<br>
+
+{% highlight c %}
+typedef int (^IntBlock)();
+ 
+IntBlock downCounter(int start) {
+	 __block int i = start;
+	 return Block_copy( ^int() {
+		 return i--;
+	 });
+ }
+ 
+IntBlock f = downCounter(5);
+printf("%d", f());
+printf("%d", f());
+printf("%d", f());
+Block_release(f);
+{% endhighlight %}
+
+{% highlight python %}
+def adder(outer_argument): # outer function
+  def adder_inner(inner_argument): # inner function, nested function
+    return outer_argument + inner_argument # Notice outer_argument
+  return adder_inner
+add5 = adder(5) # a function that adds 5 to its argument
+add7 = adder(7) # a function that adds 7 to its argument
+print add5(3) # prints 8
+print add7(3) # prints 10
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/closure.jpg)
+
+Closures are possible in Python because functions are first-class objects?! <br>
+这句不太能理解。<br>
+wiki这样解释:<br>
+{% highlight css %}
+A function is merely an object of type function. <br>
+Being an object means it is possible to pass a function object (an uncalled function) around <br>
+as argument or as return value or to assign another name <br>
+to the function object. <br>
+A unique feature that makes closure useful is that <br>
+the enclosed function (嵌套函数) may use the names defined in the parent function's scope.<br>
+{% endhighlight %}
+翻译如下：<br>
+在python里面是可以实现闭包的，因为functions是first-class对象.<br>
+一个function可以当作是function type对象。<br>
+作为一个对象意味着可以将function对象（an uncalled function）当作 （ 参数 | 返回值 | 赋值给其他变量 ）<br>
+传递给另一个函数对象。<br>
+闭包唯一有用的功能点：enclosed function 可以使用 names of the parent function's scope.<br>
+
+# lambda
+<hr>
+
+一个匿名函数。<br>
+作用：主要用于写非常简短的函数，避免了非常麻烦的传统实现方式；<br>
+{% highlight python %}
+def add(a, b):
+    return a + b
+add(4, 3)
+print (lambda a, b: a + b)(4, 3)
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/lambda1.jpg)
+
+lambda经常作为其他函数的参数（一个function object）<br>
+比如作为sorted()'s key的参数<br>
+{% highlight python %}
+sorted([[3, 4], [3, 5], [1, 2], [7, 3]], key=lambda x: x[1])
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/lambda2.jpg)
+
+在闭包这种场景经常用到lambda这种形式。<br>
+such as illustrated in the following example<br>
+{% highlight python %}
+def attribution(name):
+    return lambda x: x + ' -- ' + name
+pp = attribution('John')
+pp('Dinner is in the fridge')
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/lambda3.jpg)
+
+其中最为关键的一点是:<br>
+Note that:<br>
+the lambda function can use the values of variables<br>
+from the **scope** in which it was created (like pre and post).<br> 
+This is the essence of closure.<br>
+
+links:<br>
+<a href="https://docs.python.org/2/tutorial/controlflow.html#lambda-expressions">
+    4.7.5. Lambda Expressions
+</a>
+The Python Tutorial, docs.python.org<br>
+
+{% highlight python %}
+def make_incrementor(n):
+    return lambda x: x + n
+f = make_incrementor(42)
+f(0)
+f(1)
+pairs = [(1, 'one'), (2, 'two'), (3, 'three'), (4, 'four')]
+pairs.sort(key=lambda pair: pair[1])
+pairs
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/lambda4.jpg)
+
+###### Generator Functions
+当我们讨论loops时，在这个概念上你可以把它当做**iterator**.<br>
+**yield** 从序列里面一次返回一个元素。<br>
+而不是一次返回整个序列，<br>
+这样允许你处理比你内存空间还大的对象序列。
+你可以自己创建**iterators**, 通过定义知名的**generator function**。
+
+To illusstrate the usefullness of this,<br>
+let us start by considering a simple function 
+to return the concatenation of two list:
+{% highlight python %}
+def concat(a, b):
+    return a + b
+
+print concat([5, 4, 3], ["a", "b", "c"])
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/generator1.jpg)
+想象一下如果你做concat(range(0,1000000), range(1000000, 2000000)), <br>
+能工作，但是它会消耗大量内存。<br>
+
+**问题来了**
+能不能有更好的替代方案, 把两个**iterator**当做参数来：
+{% highlight python %}
+def concat(a, b):
+    for i in a:
+        yield i
+    for i in b:
+        yield i
+
+for i in concat(xrange(0, 1000000), xrange(1000000, 2000000)):
+    print i
+    if i > 8:
+        break
+{% endhighlight %}
+![Smithsonian Image]({{ site.url }}/images/generator2.jpg)
+它最大的好处是什么：
+你可以处理非常非常巨大的数据，而不用消耗太多内存。

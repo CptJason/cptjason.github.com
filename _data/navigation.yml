@@ -1,0 +1,22 @@
+# Site navigation links
+
+- title: Python
+  url: /python/
+
+- title: Ops
+  url: /ops/
+
+- title: Articles
+  url: /articles/
+
+- title: Blog
+  url: /blog/
+
+- title: Theme Setup
+  url: /theme-setup/
+
+- title: About
+  url: /about/
+
+#- title: Made Mistakes
+#  url: http://mademistakes.com
