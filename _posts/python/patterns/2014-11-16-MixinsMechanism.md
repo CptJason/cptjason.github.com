@@ -11,14 +11,33 @@ image:
   feature:
 date: 2014-11-16T23:08:12+08:00
 ---
+
+# Contenct
+<hr>
+
+* [模板方法](#TemplateMethods)
+    
+    * [方法占位](#placeholder_get_teapot)
+    * [实现方法](#def_get_teapot)
+* [静态混入](#StaticMixin)
+
+    * [多继承静态混入](#MultipleInheritance)
+
+* [动态混入](#Mixins)
+
+    * [BaseMixins](#使用__base__动态混入)
+    * [Base_n_getattr_Mixins](#使用__base__和getattr动态混入)
+* [DjangoExample](#django中的例子)
+* [SocketExample](#Socket中的例子)
+
+### <a name='TemplateMethods'>模板方法</a>
 该机制的用途：动态修改对象（类或实例）的属性和方法。
 
 在理解mixin之前，让我们复习一下模板方法模式。
 所谓模板方法模式就是在一个方法中定义一个算法的骨架，并将一些步骤延迟到子类中。
 模板方法可以使子类在不改变算法结构的情况写，重新定义算法中的某些步骤。（算法=行为？）
 
-## 问题来了
-
+###### <a name='placeholder_get_teapot'>模板get_teapot()占位</a>
 模板方法模式在c++ 或其他语言中并无不妥，但是在python语言中，则颇有点画蛇添足的味道。
 比如模板方法，需要先定义一个基类，而实现行为的某些步骤则必须在其子类中，在Python中并无必要。
 
@@ -34,7 +53,7 @@ class People(object):
 在此例中，get_teapot()方法并不需要预先定义。
 假设在上班是，使用的是简易茶壶，而在家里，使用的是功夫茶壶，那么可以这样编写代码：
 
-
+###### <a name='def_get_teapot'>定义模板get_teapot()</a>
 {% highlight python %}
 class OfficePeople(People):
     def get_teapot(self):
@@ -50,35 +69,38 @@ class HomePeople(People):
 由此程序员马上会想到“正走在街上的人” 边走边泡茶这样的需求是不合理，从而能够在更高层次上考虑业务的合理性，
 在更接近本源的地方修正错误。
 
-## 问题来了
-
+### <a name='StaticMixin'>静态混入</a>
 老板（OfficePeople的一个实例）拥有巨大的办公室，购置了功夫茶具，他要在办公室喝功夫茶，怎么办？
 答案两种：
 
 * 从OfficePeople继承子类Boss, 重写它的get_teapot(), 使它返回功夫茶具
 * 把get_teapot()方法提取出来，把它以多继承的方式做一次静态混入
 
-以下很好解决老板在公司和功夫茶的需求。
+以下很好解决老板在公司喝功夫茶的需求。
 
+###### <a name='MultipleInheritance'>多继承实现静态混入</a>
 {% highlight python %}
 class UseSimpleTeapot(object):
     def get_teapot(self):
         return SimpleTeapot()
+
 class UseKungfuTeapot(object):
     def get_teapot(self):
         return KungfuTeapot()
+
 class OfficePeople(People, UseSimpleTeapot): pass
 class HomePeople(People, UseKungfuTeapot): pass
 class Boss(People, UseKungfuTeapot): pass
 {% endhighlight %}
 
-## 问题来了
+### <a name='Mixins'>动态混入</a>
 
 但这样仍然没有把python的动态性表现出来：当新的需求出现时，需要更改类定义。
 比如随着公司扩张，越来越多的人入职，OfficePeople的需求越来越多，开始出现有人不喝茶而是喝咖啡，也有人
 既喜欢喝茶有喜欢喝咖啡，出现了喜欢在独立办公室抽雪茄的职业经理人......这些类越来越多，代码越发难已维护。
 开始寄望生成动态实例：
 
+###### <a name='BaseMixins'>使用__base__动态混入</a>
 {% highlight python %}
 def simple_tea_people():
     people = People()
@@ -98,7 +120,7 @@ def boss():
 {% endhighlight %}
 
 这个代码能够运行的原理是，每一个类都有一个__bases__属性，它是一个元祖，用来存放所有的基类。
-与其他静态语言不通，Python语言中的基类在运行中可以动态改变。
+与其他静态语言不同，Python语言中的基类在运行中可以动态改变。
 所以当我们向其中增加新的基类时，这个类就拥有了新的方法，也就是所谓的混入（mixin）。
 这种动态性的好处在于代码获得了更丰富的扩展功能。
 想象以下，你之前写好的代码并不需要个性，只要后期为它增加基类，就能增强功能（或替换原有行为）
@@ -107,6 +129,7 @@ def boss():
 假定我们在OA系统定义员工的时候，有一个特性选择页面，在里面可以勾选该员工的需求。
 比如对于Boss，可以勾选功夫茶和咖啡，那么通过的代码可能如下：
 
+###### <a name='Base_n_getattr_Mixins'>使用__base__ 和 getattr 动态混入</a>
 {% highlight python%}
 import mixins
 def staff():
@@ -118,9 +141,7 @@ def staff():
     return people
 {% endhighlight%}
 
-# 来两个例
-## django中的一个例子
-
+### <a name='DjangoExample'>django中的多继承例子</a>
 在python里面使用mixins非常有用的一个情况是：
 
 * 当你从一个package导入一些相似的类，而需要去变更它们中的一个方法时
@@ -164,8 +185,7 @@ class ProtectedDetailView(OwnedObjectMixin, DetailView):
 并且通过super调用父类DetailView方法get_object，所以有子类化DetailView的效果并覆写get_object方法。
 当然我们可以应用同样的Mixin至其他类。
 
-## SocketServer中的一个例子
-
+### <a name='SocketExample'>SocketServer中的例子</a>
 {% highlight python %}
 class ForkingUDPServer(ForkingMixIn, UDPServer): pass
 class ForkingTCPServer(ForkingMixIn, TCPServer): pass

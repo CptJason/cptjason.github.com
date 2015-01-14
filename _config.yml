@@ -6,8 +6,6 @@ description: Stay hungry & Stay foolish
 logo: site-logo.png
 search: true
 url: 
-paginate: 1
-paginate_path: "blog/page:num"
 
 
 # Jekyll configuration
@@ -50,7 +48,7 @@ owner:
   tumblr: #username
   google:
     plus: 
-    analytics:
+    analytics: UA-21268692-1
     verify:
     ad-client:
     ad-slot: 
